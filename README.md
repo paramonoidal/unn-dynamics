@@ -9,7 +9,7 @@
 ```sh
 ./build.sh                       # build/notes.pdf + build/lectures/*.pdf
 typst compile main.typ notes.pdf # только полный конспект
-typst compile lecture.typ l7.pdf --input lec=lectures/07_2026-10-30.typ  # одна лекция
+typst compile lecture.typ l8.pdf --input lec=lectures/08_2026-10-30.typ  # одна лекция
 ```
 
 Отрендеренные PDF лежат на Google Диске, в репозитории только исходники.
@@ -18,6 +18,6 @@ typst compile lecture.typ l7.pdf --input lec=lectures/07_2026-10-30.typ  # од�
 
 - `template.typ` — общий шаблон (ilm + ctheorems), окружения: теорема, лемма, утверждение, определение, замечание, пример, задача, д/з; красные блоки `#solution` — полные решения.
 - `figures.typ` — рисунки (cetz).
-- `lectures/` — по файлу на каждую лекцию: 1 — без даты, затем 11.09.26, 25.09.26, 02.10.26, 16.10.26, 23.10.26, 30.10.26.
+- `lectures/` — по файлу на каждую лекцию: 1 — без даты, затем 11.09.26, 25.09.26, 02.10.26, 16.10.26, 23.10.26, 27.10.26 (по видеозаписи), 30.10.26.
 - `main.typ` — полный конспект, `lecture.typ` — одна лекция.
 - `ERRATA.md` — список исправлений рукописи и дописанного материала.

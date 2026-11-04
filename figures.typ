@@ -266,3 +266,87 @@
   line((-2.5, 0), (0, 0), stroke: (paint: orange, thickness: 1.4pt, dash: "dashed"))
   content((-1.8, 0), text(fill: orange, size: 0.8em)[разрез], anchor: "south", padding: 3pt)
 })
+
+// ───────── лекция 7 (27.10.26) ─────────
+
+// Три типа траекторий потока: покой, цикл, неособая траектория.
+#let fig-traj-types() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  // покой
+  circle((0, 0), radius: 0.08, fill: blue, stroke: blue)
+  content((0, -1.5), text(size: 0.85em)[покой: точка])
+  // цикл
+  let cyc = range(73).map(i => {
+    let a = i * 5 * calc.pi / 180
+    (3.4 + 1.2 * calc.cos(a) + 0.15 * calc.cos(2 * a), 1.0 * calc.sin(a))
+  })
+  line(..cyc, stroke: 1pt + blue, close: true)
+  line((3.4 + 1.35, -0.05), (3.4 + 1.35, 0.1), mark: (end: ">", fill: blue), stroke: 1pt + blue)
+  content((3.4, -1.5), text(size: 0.85em)[период $tau$: окружность])
+  // неособая
+  let pts = range(101).map(i => {
+    let s = -1 + 2 * i / 100
+    (7.6 + 1.5 * s, 0.6 * calc.sin(3.2 * s) + 0.25 * s)
+  })
+  line(..pts, stroke: 1pt + blue)
+  line(pts.at(49), pts.at(52), mark: (end: ">", fill: blue), stroke: 1pt + blue)
+  content((7.6, -1.5), text(size: 0.85em)[неособая: образ прямой])
+})
+
+// «Картинка центра»: в любой окрестности точки покоя лежат целые замкнутые траектории.
+#let fig-center() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  for r in (0.45, 0.9, 1.35, 1.8) {
+    circle((0, 0), radius: (r * 1.25, r), stroke: 0.8pt + blue)
+    line((r * 1.25, -0.05), (r * 1.25, 0.08), mark: (end: ">", fill: blue), stroke: 0.8pt + blue)
+  }
+  circle((0, 0), radius: 0.06, fill: ink, stroke: ink)
+  content((0, 0), [$x$], anchor: "north-east", padding: 2pt)
+  circle((0, 0), radius: 0.75, stroke: (paint: red, dash: "dashed", thickness: 0.8pt))
+  content((0.55, 0.55), text(fill: red, size: 0.85em)[$U_epsilon (x)$], anchor: "south-west", padding: 2pt)
+})
+
+// Теорема Биркгофа: вне U(Omega) лежит лишь конечное число «уходящих от себя» окрестностей V_i;
+// каждую из них траектория посещает не более одного раза.
+#let fig-birkhoff() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  rect((-0.4, -0.4), (8.4, 3.6), stroke: 0.6pt + ink, fill: luma(248))
+  content((8.2, 3.4), [$M$], anchor: "north-east")
+  // неблуждающее множество и его окрестность
+  circle((6.4, 1.6), radius: (1.0, 0.6), fill: rgb("#d8e4f8"), stroke: 0.8pt + blue)
+  content((6.4, 1.6), text(fill: blue)[$Omega(f)$])
+  circle((6.4, 1.6), radius: (1.6, 1.15), stroke: (paint: blue, dash: "dashed", thickness: 0.8pt))
+  content((6.4, 2.75), text(fill: blue, size: 0.85em)[$U$], anchor: "south", padding: 2pt)
+  // окрестности V_i
+  let vs = ((0.6, 2.7), (1.6, 0.6), (2.4, 2.4), (3.4, 1.0), (3.9, 2.9))
+  for (i, c) in vs.enumerate() {
+    circle(c, radius: 0.5, stroke: 0.7pt + orange, fill: orange.lighten(85%))
+    content((c.at(0) + 0.42, c.at(1) + 0.42), text(fill: orange, size: 0.75em)[$V_#i$])
+  }
+  // траектория: по одному визиту в некоторые V_i, затем в U
+  let orb = ((0.5, 2.6), (1.7, 0.7), (3.3, 1.1), (2.5, 2.3), (5.4, 1.2), (6.9, 2.1), (5.9, 1.0))
+  for k in range(orb.len() - 1) {
+    line(orb.at(k), orb.at(k + 1), stroke: (paint: luma(90), thickness: 0.5pt, dash: "dotted"), mark: (end: ">", fill: luma(90), scale: 0.6))
+  }
+  for p in orb { circle(p, radius: 0.06, fill: ink, stroke: ink) }
+  content(orb.at(0), text(size: 0.8em)[$x$], anchor: "east", padding: 4pt)
+})
+
+// Поднятие сохраняющего ориентацию гомеоморфизма окружности: F(t) = t + 0.3 + 0.1 sin(2 pi t).
+#let fig-lift() = cetz.canvas(length: 1.6cm, {
+  import cetz.draw: *
+  let F(t) = t + 0.3 + 0.1 * calc.sin(2 * calc.pi * t)
+  axes(-0.3, 2.4, -0.3, 2.6, xl: $t$, yl: none)
+  line((-0.2, -0.2), (2.2, 2.2), stroke: (dash: "dotted", thickness: 0.6pt))
+  line(..sample(F, -0.2, 2.15, n: 120), stroke: 1pt + blue)
+  line(..sample(t => F(t) + 1, -0.2, 1.15, n: 80), stroke: (paint: orange, thickness: 0.8pt, dash: "dashed"))
+  for k in (1, 2) {
+    line((k, -0.05), (k, 0.05), stroke: 0.5pt)
+    content((k, 0), [$#k$], anchor: "north", padding: 3pt)
+    line((-0.05, k), (0.05, k), stroke: 0.5pt)
+    content((0, k), [$#k$], anchor: "east", padding: 3pt)
+  }
+  content((2.15, F(2.15)), text(fill: blue, size: 0.85em)[$F$], anchor: "west", padding: 3pt)
+  content((1.15, F(1.15) + 1), text(fill: orange, size: 0.85em)[$F + 1$], anchor: "west", padding: 3pt)
+  content((2.2, 2.2), text(size: 0.8em)[$y = t$], anchor: "south-west", padding: 2pt)
+})

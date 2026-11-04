@@ -12,4 +12,5 @@
 #include "lectures/04_2026-10-02.typ"
 #include "lectures/05_2026-10-16.typ"
 #include "lectures/06_2026-10-23.typ"
-#include "lectures/07_2026-10-30.typ"
+#include "lectures/07_2026-10-27.typ"
+#include "lectures/08_2026-10-30.typ"
