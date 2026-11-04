@@ -610,3 +610,86 @@
   line(..arcpts(o, 0.9, I0 + L / 2, I0 + L / 2 + al), stroke: 0.7pt + ink, mark: (end: ">", fill: ink))
   content((0.35, 0.55), text(size: 0.8em)[$2 pi alpha$])
 })
+
+// ---------- Лекция 6 ----------
+
+// Теорема Лиувилля на примере гамильтоновой системы H = (p^2 - x^2)/2: dot(x) = p, dot(p) = x (седло).
+// phi_t линейно: (x ch t + p sh t, x sh t + p ch t); круг E переходит в эллипс той же площади.
+#let fig-liouville() = cetz.canvas(length: 1.1cm, {
+  import cetz.draw: *
+  axes(-2.3, 2.5, -2.0, 2.3, xl: $x$, yl: $p$)
+  // фазовые кривые x^2 - p^2 = c (ветви гипербол) и сепаратрисы
+  line((-2, -2), (2.1, 2.1), stroke: (paint: luma(150), thickness: 0.5pt))
+  line((-2, 2), (2, -2), stroke: (paint: luma(150), thickness: 0.5pt))
+  for c in (0.5, 1.2) {
+    for sx in (-1, 1) {
+      line(..range(41).map(i => {
+        let s = -1.35 + 2.7 * i / 40
+        (sx * c * calc.cosh(s), c * calc.sinh(s))
+      }).filter(q => calc.abs(q.at(1)) <= 2.0 and calc.abs(q.at(0)) <= 2.3), stroke: (paint: luma(170), thickness: 0.5pt))
+      line(..range(41).map(i => {
+        let s = -1.35 + 2.7 * i / 40
+        (c * calc.sinh(s), sx * c * calc.cosh(s))
+      }).filter(q => calc.abs(q.at(1)) <= 2.0 and calc.abs(q.at(0)) <= 2.3), stroke: (paint: luma(170), thickness: 0.5pt))
+    }
+  }
+  let (cx, cy, r, t) = (1.0, -0.1, 0.36, 0.65)
+  let disk = range(61).map(i => {
+    let a = 2 * calc.pi * i / 60
+    (cx + r * calc.cos(a), cy + r * calc.sin(a))
+  })
+  let flow(q) = (q.at(0) * calc.cosh(t) + q.at(1) * calc.sinh(t), q.at(0) * calc.sinh(t) + q.at(1) * calc.cosh(t))
+  line(..disk, close: true, stroke: 1pt + blue, fill: blue.lighten(80%))
+  line(..disk.map(flow), close: true, stroke: 1pt + red, fill: red.lighten(85%))
+  content((cx, cy), text(fill: blue)[$E$])
+  let fc = flow((cx, cy))
+  content((fc.at(0) + 0.45, fc.at(1) + 0.3), text(fill: red)[$phi_t (E)$], anchor: "south-west")
+})
+
+// Пример выпрямления: траектории x_1 = (y_1 + 1/2) e^(-x_2) + (sin x_2 - cos x_2)/2, x_2 = t;
+// h переводит прямые y_1 = const в эти кривые, ось y_2 = 0 --- в сечение x_2 = 0.
+#let fig-straighten-ex() = cetz.canvas(length: 2.1cm, {
+  import cetz.draw: *
+  axes(-1.3, 2.2, -1.1, 1.2, xl: $x_1$, yl: $x_2$)
+  for y1 in (-0.4, -0.2, 0, 0.2, 0.4) {
+    let pts = range(41).map(i => {
+      let s = -0.95 + 1.9 * i / 40
+      ((y1 + 0.5) * calc.exp(-s) + (calc.sin(s) - calc.cos(s)) / 2, s)
+    })
+    line(..pts, stroke: 1pt + blue)
+    line(pts.at(10), pts.at(12), mark: (end: ">", fill: blue), stroke: 1pt + blue)
+  }
+  line((-1.2, 0), (2.0, 0), stroke: (paint: red, dash: "dashed", thickness: 0.8pt))
+  circle((0, 0), radius: 0.04, fill: ink, stroke: ink)
+  content((0, 0), [$a$], anchor: "south-east", padding: 2pt)
+})
+
+// Функция h : K -> [0, 1] из задачи о канторовом omega-предельном множестве: двоичные цифры x_i / 2.
+// На K это канторова лестница; смежные интервалы K (пунктир) h склеивает в двоично-рациональные точки.
+#let cantor-fn(x) = {
+  let (y, w, z) = (0.0, 0.5, x)
+  for _ in range(14) {
+    if z < 1 / 3 { z = 3 * z } else if z <= 2 / 3 { y = y + w; z = -1 } else { y = y + w; z = 3 * z - 2 }
+    if z < 0 { break }
+    w = w / 2
+  }
+  y
+}
+#let fig-cantor-stair() = cetz.canvas(length: 4.6cm, {
+  import cetz.draw: *
+  axes(-0.05, 1.12, -0.05, 1.1)
+  line(..range(601).map(i => (i / 600, cantor-fn(i / 600))), stroke: 1pt + blue)
+  // K на оси x (уровень 3)
+  let segs = ((0.0, 1.0),)
+  for _ in range(3) {
+    segs = segs.map(s => { let d = (s.at(1) - s.at(0)) / 3; ((s.at(0), s.at(0) + d), (s.at(1) - d, s.at(1))) }).flatten().chunks(2)
+  }
+  for s in segs { line((s.at(0), -0.03), (s.at(1), -0.03), stroke: 2pt + ink) }
+  for (x, lab) in ((1 / 3, [$1\/3$]), (2 / 3, [$2\/3$]), (1, [$1$])) {
+    content((x, -0.03), text(size: 0.8em, lab), anchor: "north", padding: 3pt)
+  }
+  content((0, 1), [$1$], anchor: "east", padding: 3pt)
+  content((0, 0.5), [$1\/2$], anchor: "east", padding: 3pt)
+  line((0, 0.5), (1 / 3, 0.5), stroke: (dash: "dotted", thickness: 0.5pt))
+  content((0.7, 0.25), text(size: 0.85em)[$K$ (жирно на оси)])
+})
