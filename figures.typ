@@ -406,3 +406,19 @@
   content((1.15, F(1.15) + 1), text(fill: orange, size: 0.85em)[$F + 1$], anchor: "west", padding: 3pt)
   content((2.2, 2.2), text(size: 0.8em)[$y = t$], anchor: "south-west", padding: 2pt)
 })
+
+// Решения X' = |X|^(1/2), X(0) = 0: склейки парабол с нулём (лекция 2, контрольный вопрос 4 методички).
+#let fig-sqrt-family() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  axes(-3.4, 3.6, -1.6, 1.8, xl: $t$, yl: $X$)
+  for c in (0, 0.8, 1.6) {
+    line(..sample(t => (t - c) * (t - c) / 4, c, calc.min(c + 2.4, 3.3)), stroke: 1pt + blue)
+  }
+  for c in (0, -0.8, -1.6) {
+    line(..sample(t => -(t - c) * (t - c) / 4, calc.max(c - 2.4, -3.3), c), stroke: 1pt + orange)
+  }
+  line((-3.3, 0), (3.3, 0), stroke: 1.4pt + red)
+  content((2.9, 1.45), text(size: 0.8em, fill: blue)[$(t - c_2)^2 \/ 4$], anchor: "south")
+  content((-2.9, -1.45), text(size: 0.8em, fill: orange)[$-(t - c_1)^2 \/ 4$], anchor: "north")
+  content((1.0, 0), text(size: 0.8em, fill: red)[$X equiv 0$], anchor: "north", padding: 3pt)
+})

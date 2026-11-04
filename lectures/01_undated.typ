@@ -29,7 +29,8 @@
     $ norm(F(t, X_1) - F(t, X_2))_(Rn) <= L norm(X_1 - X_2). $
 
   Тогда $exists!$ решение $X = X(t)$ на отрезке $[t_0 - h, t_0 + h]$, где
-  $ h = min(a, b / M) = h(sup_((t, X) in A) norm(F(t, X))_(Rn), a, b). $
+  $ h = min(a, b / M) = h(sup_((t, X) in A) norm(F(t, X))_(Rn), a, b), $
+  оно непрерывно дифференцируемо и на этом отрезке не выходит из $A$.
 ]
 
 #note[
@@ -46,7 +47,8 @@
   $ norm(X_1 (t) - X_0)_(Rn) = norm(integral_(t_0)^t F(s, X_0) dif s) <= abs(integral_(t_0)^t norm(F(s, X_0)) dif s) <= M h. $
 
   По индукции:
-  $ norm(X_m (t) - X_0) = norm(integral_(t_0)^t F(s, X_(m-1)) dif s) <= abs(integral_(t_0)^t norm(F(s, X_(m-1))) dif s) <= M h. $
+  $ norm(X_m (t) - X_0) = norm(integral_(t_0)^t F(s, X_(m-1)) dif s) <= abs(integral_(t_0)^t norm(F(s, X_(m-1))) dif s) <= M h <= b. $
+  Значит, все $X_m$ непрерывны на $[t_0 - h, t_0 + h]$ (интеграл с переменным верхним пределом) и их графики лежат в $A$, где действуют оценка $norm(F) <= M$ и условие Липшица. Ради этого и берётся $h <= b \/ M$.
 
   Рассмотрим ряд
   $ X_0 (t) + (X_1 - X_0)(t) + (X_2 - X_1)(t) + dots + (X_m - X_(m-1))(t) + dots $
@@ -66,11 +68,16 @@
 
   Предельная функция --- решение:
   $ norm(integral_(t_0)^t F(s, X_m (s)) - F(s, overline(X)(s)) dif s) &<= abs(integral_(t_0)^t norm(F(s, X_m (s)) - F(s, overline(X)(s))) dif s) \
-    &<= L abs(integral_(t_0)^t norm(X_m (s) - overline(X)(s)) dif s) <= L epsilon h. $
+    &<= L abs(integral_(t_0)^t norm(X_m (s) - overline(X)(s)) dif s) <= L epsilon h, $
+  где $m > m_0 (epsilon)$ выбрано по равномерной сходимости так, что $norm(X_m (s) - overline(X)(s)) < epsilon$ на всём отрезке. Значит, $integral_(t_0)^t F(s, X_m (s)) dif s -> integral_(t_0)^t F(s, overline(X)(s)) dif s$, и, переходя к пределу в определении $X_m$, получаем
+  $ overline(X)(t) = X_0 + integral_(t_0)^t F(s, overline(X)(s)) dif s, $
+  то есть $overline(X)$ --- решение интегрального уравнения, а значит, и задачи Коши. Из $norm(X_m - X_0) <= M h <= b$ в пределе $norm(overline(X) - X_0) <= b$: решение не выходит из $A$.
 
   _Единственность._ Пусть существует решение $Z != overline(X)$. Тогда
   $ norm(Z(t) - X_m (t)) <= L abs(integral_(t_0)^t norm(Z(s) - X_(m-1)(s)) dif s) <= M h = M / L dot L h $
-  (и далее по индукции, как выше).
+  (и далее по индукции, как выше). По индукции получается
+  $ norm(Z(t) - X_m (t)) <= M / L dot (L h)^(m+1) / (m+1)! limits(-->)_(m -> oo) 0, $
+  то есть $X_m unif(m -> oo) Z$. Но $X_m unif(m -> oo) overline(X)$, поэтому $Z equiv overline(X)$.
 
   #homework[Подробное доказательство единственности.]
 ]
@@ -120,3 +127,14 @@ $ abs(f(a) - f(b)) <= L abs(a - b), quad L = sup_([a, b]) abs(f'(x)) < oo. $
 Для $F(X) : bb(R)^m -> Rn$, $F_i in C^1_R$, при всех $X_(1,2) in R$
 $ norm(F(X_1) - F(X_2))_(Rn) <= sup norm(D F) dot norm(X_1 - X_2) = norm((partial_j F_i)) dot norm(X_1 - X_2), $
 $ L = max_(1 <= i <= n) sum_(j=1)^m sup_(X in R) abs(partial_j F_i). $
+
+#problem([методичка, контрольный вопрос 1 к п. 1])[
+  Пояснить, почему условие Липшица выполнено, если все $partial F_i \/ partial x_j$ существуют и непрерывны на $R$, и какую константу $L$ можно взять.
+]
+#solution([Решение])[
+  Возьмём $(t, X'), (t, X'') in R$. Множество $R$ (прямоугольник) выпукло, поэтому отрезок $X(theta) = X'' + theta (X' - X'')$, $theta in [0, 1]$, лежит в $R$. Для каждой координаты по теореме Лагранжа для функции $g_i (theta) = F_i (t, X(theta))$ найдётся $theta_i in (0, 1)$:
+  $ F_i (t, X') - F_i (t, X'') = g_i (1) - g_i (0) = sum_(j=1)^n (partial F_i) / (partial x_j) (t, X(theta_i)) (x'_j - x''_j). $
+  Частные производные непрерывны на компакте $R$, поэтому ограничены (Вейерштрасс): $abs(partial_j F_i) <= K$. Для нормы $norm(X) = max_i abs(x_i)$ получаем
+  $ abs(F_i (t, X') - F_i (t, X'')) <= sum_(j=1)^n abs(partial_j F_i) abs(x'_j - x''_j) <= (sum_(j=1)^n sup_R abs(partial_j F_i)) norm(X' - X''), $
+  то есть условие Липшица с $L = max_i sum_j sup_R abs(partial_j F_i) <= n K$. Константа $max_(i, j) sup_R abs(partial_j F_i)$ из методички годится, только если умножить её на $n$ (или при $n = 1$).
+]
