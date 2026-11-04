@@ -472,3 +472,24 @@
   content((c, 0), [$c$], anchor: "north", padding: 3pt)
   content((c, c * c), text(fill: red, size: 0.85em)[$S_c = [0, c^2]$], anchor: "west", padding: 4pt)
 })
+
+// Первые ранги канторова множества K и множества K_alpha положительной меры (лекция 4).
+#let fig-cantor() = {
+  let ranks(segs-of, n) = cetz.canvas(length: 5cm, {
+    import cetz.draw: *
+    for k in range(n + 1) {
+      for (a, b) in segs-of(k) {
+        line((a, -k * 0.11), (b, -k * 0.11), stroke: 2.2pt + blue)
+      }
+      content((-0.03, -k * 0.11), text(size: 0.7em)[$#k$], anchor: "east")
+    }
+  })
+  let split(segs, gap) = segs.map(((a, b)) => {
+    let m = (a + b) / 2
+    ((a, m - gap / 2), (m + gap / 2, b))
+  }).flatten().chunks(2)
+  let cl(k) = { let s = ((0.0, 1.0),); for i in range(k) { s = s.map(((a, b)) => ((a, a + (b - a) / 3), (b - (b - a) / 3, b))).flatten().chunks(2) }; s }
+  let al = 0.5
+  let ka(k) = { let s = ((0.0, 1.0),); for i in range(k) { s = split(s, al / calc.pow(2, 2 * i + 1)) }; s }
+  grid(columns: (1fr, 1fr), gutter: 1.5em, align: center, ranks(cl, 4), ranks(ka, 4))
+}

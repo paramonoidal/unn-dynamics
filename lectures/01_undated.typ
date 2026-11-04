@@ -128,7 +128,7 @@ $ abs(f(a) - f(b)) <= L abs(a - b), quad L = sup_([a, b]) abs(f'(x)) < oo. $
 $ norm(F(X_1) - F(X_2))_(Rn) <= sup norm(D F) dot norm(X_1 - X_2) = norm((partial_j F_i)) dot norm(X_1 - X_2), $
 $ L = max_(1 <= i <= n) sum_(j=1)^m sup_(X in R) abs(partial_j F_i). $
 
-#problem([методичка, контрольный вопрос 1 к п. 1])[
+#question([методичка, контрольный вопрос 1 к п. 1])[
   Пояснить, почему условие Липшица выполнено, если все $partial F_i \/ partial x_j$ существуют и непрерывны на $R$, и какую константу $L$ можно взять.
 ]
 #solution([Решение])[

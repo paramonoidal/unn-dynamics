@@ -39,6 +39,8 @@
 #let remark = plain-env("remark", "Замечание", c-rem)
 #let example = plain-env("example", "Пример", c-ex)
 #let problem = plain-env("problem", "Задача", c-hw)
+// Контрольные вопросы и задачи на подумать из методичек (отдельная нумерация, чтобы не сдвигать номера задач с лекций)
+#let question = plain-env("question", "Вопрос", c-hw)
 #let homework = plain-env("homework", "Д/з", c-hw)
 #let proof = thmproof("proof", "Доказательство", base: "heading", base_level: 1, titlefmt: emph, inset: (x: 0em, y: 0.2em))
 
