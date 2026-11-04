@@ -422,3 +422,53 @@
   content((-2.9, -1.45), text(size: 0.8em, fill: orange)[$-(t - c_1)^2 \/ 4$], anchor: "north")
   content((1.0, 0), text(size: 0.8em, fill: red)[$X equiv 0$], anchor: "north", padding: 3pt)
 })
+
+// Три исхода продолжения решения (лекция 3, следствие 10 методички).
+#let fig-max-interval() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  axes(-0.3, 7.6, -0.3, 3.6, xl: $t$, yl: $X$)
+  // область E: полоса, сверху слева не ограничена, справа --- «потолок»
+  let dsh = (paint: luma(120), dash: "dashed", thickness: 0.7pt)
+  merge-path(close: true, stroke: none, fill: luma(246), {
+    line((0.2, 0.2), (7.3, 0.2))
+    line((7.3, 0.2), (7.3, 1.3))
+    bezier((7.3, 1.3), (3.6, 2.6), (5.6, 1.4), (4.4, 2.0))
+    line((3.6, 2.6), (3.6, 3.5))
+    line((3.6, 3.5), (0.2, 3.5))
+  })
+  line((0.2, 3.5), (0.2, 0.2), (7.3, 0.2), (7.3, 1.3), stroke: dsh)
+  bezier((7.3, 1.3), (3.6, 2.6), (5.6, 1.4), (4.4, 2.0), stroke: dsh)
+  line((3.6, 2.6), (3.6, 3.5), stroke: dsh)
+  content((1.3, 3.5), text(size: 0.75em, fill: luma(110))[$arrow.t$ не ограничено], anchor: "south")
+  content((0.5, 3.1), [$E$])
+  let p0 = (0.6, 0.9)
+  circle(p0, radius: 0.06, fill: ink, stroke: ink)
+  content(p0, text(size: 0.8em)[$(t_0, X_0)$], anchor: "north", padding: 4pt)
+  // (1) до бесконечности по t
+  line(..sample(t => 0.9 + 0.25 * calc.sin(1.6 * (t - 0.6)), 0.6, 7.3), stroke: 1pt + blue)
+  content((7.3, 0.75), text(size: 0.8em, fill: blue)[(1) $omega_+ = oo$], anchor: "west", padding: 3pt)
+  // (2) выход на границу
+  line(..sample(t => 0.9 + 0.32 * (t - 0.6), 0.6, 4.6), stroke: 1pt + orange)
+  circle((4.6, 2.18), radius: 0.06, fill: orange, stroke: orange)
+  content((4.6, 2.18), text(size: 0.8em, fill: orange)[(2) $(delta, X(delta)) in partial E$], anchor: "south-west", padding: 3pt)
+  // (3) уход на бесконечность
+  line(..sample(t => 0.9 + 0.12 / (3.2 - t) - 0.12 / 2.6, 0.6, 3.157), stroke: 1pt + red)
+  line((3.2, 0.2), (3.2, 3.4), stroke: (paint: red, dash: "dotted", thickness: 0.6pt))
+  content((3.2, 3.4), text(size: 0.8em, fill: red)[(3) $t = delta$], anchor: "south-west", padding: 2pt)
+})
+
+// Множество достижимости S_c для dot(X) = 2 sqrt(|X|), X(0) = 0 (лекция 3, теорема Кнезера).
+#let fig-kneser() = cetz.canvas(length: 1.2cm, {
+  import cetz.draw: *
+  let c = 2.0
+  axes(-0.2, 2.9, -0.2, 4.6, xl: $t$, yl: $X$)
+  for tau in (0, 0.4, 0.8, 1.2, 1.6) {
+    line((0, 0), (tau, 0), stroke: 1pt + blue)
+    line(..sample(t => (t - tau) * (t - tau), tau, calc.min(tau + 2.05, 2.6), n: 40), stroke: 1pt + blue)
+  }
+  line((0, 0), (2.6, 0), stroke: 1pt + blue)
+  line((c, -0.1), (c, 4.4), stroke: (dash: "dotted", thickness: 0.6pt))
+  line((c, 0), (c, c * c), stroke: 2.2pt + red)
+  content((c, 0), [$c$], anchor: "north", padding: 3pt)
+  content((c, c * c), text(fill: red, size: 0.85em)[$S_c = [0, c^2]$], anchor: "west", padding: 4pt)
+})
