@@ -218,3 +218,51 @@
   content((1, 0), [$1$], anchor: "north", padding: 3pt)
   content((0, 0), [$0$], anchor: "north-east", padding: 3pt)
 })
+
+// ───────── лекция 7 (30.10.26) ─────────
+
+// Лист Декарта x^3 + 3xy - y^3 = 0 (линия уровня C = 0 из задачи 7.1).
+// Параметризация y = kx: x = -3k/(1-k^3), y = -3k^2/(1-k^3).
+#let folium-pts(k0, k1, n: 160, R: 2.6) = range(n + 1).map(i => {
+  let k = k0 + (k1 - k0) * i / n
+  let d = 1 - k * k * k
+  (-3 * k / d, -3 * k * k / d)
+}).filter(p => calc.abs(p.at(0)) <= R and calc.abs(p.at(1)) <= R)
+
+#let fig-folium() = cetz.canvas(length: 1.1cm, {
+  import cetz.draw: *
+  axes(-2.7, 2.9, -2.7, 2.9, yl: $y$)
+  // парабола x = y^2, на которой правая часть y' = -(x^2+y)/(x-y^2) не определена
+  line(..range(81).map(i => { let y = -1.6 + 3.2 * i / 80; (y * y, y) }), stroke: (paint: luma(150), dash: "dashed", thickness: 0.6pt))
+  content((2.56, 1.6), text(fill: luma(110), size: 0.8em)[$x = y^2$], anchor: "west", padding: 2pt)
+  // ветвь x = psi(y) (вертикальная касательная в 0)
+  line(..folium-pts(-60, -1.2), stroke: 1pt + blue)
+  line(..folium-pts(-1.2, -0.45), stroke: 1pt + blue)
+  line(..folium-pts(1.15, 60), stroke: 1pt + blue)
+  line(..folium-pts(0.45, 0.93), stroke: 1pt + blue)
+  // ветвь y = phi(x): решение задачи Коши y(0) = 0
+  line(..folium-pts(-0.45, 0.45, n: 120), stroke: 1.6pt + red)
+  circle((0, 0), radius: 0.06, fill: ink, stroke: ink)
+  circle((1, -1), radius: 0.06, fill: white, stroke: ink)
+  content((1, -1), text(size: 0.8em)[$(1, -1)$], anchor: "east", padding: 4pt)
+  content((-1.3, 0.1), text(fill: red, size: 0.85em)[$y = phi(x)$], anchor: "south")
+})
+
+// Траектории dot(x)_1 = 2x_1 - x_2, dot(x)_2 = x_1 + 2x_2 (раскручивающийся фокус)
+// и выпрямляющие координаты: y_2 = const --- лучи, y_1 = const --- спирали.
+#let fig-focus() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  axes(-2.6, 2.8, -2.4, 2.6, xl: $x_1$, yl: $x_2$)
+  for th in range(6) {
+    let a = th * calc.pi / 3
+    line(..range(121).map(i => {
+      let t = -3.2 + 3.6 * i / 120
+      let r = 0.9 * calc.exp(2 * t / 6.0 * 1.0)
+      (r * calc.cos(t + a), r * calc.sin(t + a))
+    }).filter(p => calc.abs(p.at(0)) <= 2.5 and calc.abs(p.at(1)) <= 2.3), stroke: 0.8pt + blue)
+  }
+  circle((1, 0), radius: 0.06, fill: red, stroke: red)
+  content((1, 0), text(fill: red, size: 0.85em)[$a = (1, 0)$], anchor: "north-west", padding: 3pt)
+  line((-2.5, 0), (0, 0), stroke: (paint: orange, thickness: 1.4pt, dash: "dashed"))
+  content((-1.8, 0), text(fill: orange, size: 0.8em)[разрез], anchor: "south", padding: 3pt)
+})
