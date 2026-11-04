@@ -693,3 +693,55 @@
   line((0, 0.5), (1 / 3, 0.5), stroke: (dash: "dotted", thickness: 0.5pt))
   content((0.7, 0.25), text(size: 0.85em)[$K$ (жирно на оси)])
 })
+
+// ---------- Лекция 8 ----------
+
+// Уравнение Эйлера x^2 y'' - 4 x y' + 6 y = 0: решения на R --- C_1 x^2 + C_2 x^3 при x >= 0 и C_1 x^2 + D_2 x^3 при x < 0.
+// Все проходят через (0, 0) с y'(0) = 0; при одном C_1 = 1 ветви справа и слева выбираются независимо.
+#let fig-euler-family() = cetz.canvas(length: 1.5cm, {
+  import cetz.draw: *
+  axes(-1.6, 1.7, -1.2, 2.1, xl: $x$, yl: $y$)
+  let clip(pts) = pts.filter(q => q.at(1) >= -1.15 and q.at(1) <= 2.05)
+  for c2 in (-1.5, 0, 1.5) {
+    line(..clip(sample(x => x * x + c2 * x * x * x, 0, 1.5)), stroke: 1pt + blue)
+    line(..clip(sample(x => x * x + c2 * x * x * x, -1.5, 0)), stroke: 1pt + red)
+  }
+  line(..clip(sample(x => -0.6 * x * x, -1.5, 1.5)), stroke: (paint: green, thickness: 1pt, dash: "dashed"))
+  circle((0, 0), radius: 0.05, fill: ink, stroke: ink)
+  content((1.0, 2.1), text(fill: blue, size: 0.8em)[$x^2 + C_2 x^3$], anchor: "south-west")
+  content((-1.0, 2.1), text(fill: red, size: 0.8em)[$x^2 + D_2 x^3$], anchor: "south-east")
+  content((1.75, -0.75), text(fill: green, size: 0.8em)[$-0.6 x^2$], anchor: "west")
+})
+
+// Иррациональная обмотка тора (квадрат с отождествлёнными сторонами): кусок траектории x и выброшенная траектория p.
+#let fig-torus-winding() = cetz.canvas(length: 3.4cm, {
+  import cetz.draw: *
+  rect((0, 0), (1, 1), stroke: 0.8pt + ink)
+  let g = 0.618034
+  // траектория x: u = t mod 1, v = (0.1 + g t) mod 1, t in [0, 4]
+  for k in range(4) {
+    let v0 = calc.fract(0.1 + g * k)
+    let v1 = v0 + g
+    if v1 <= 1 { line((0, v0), (1, v1), stroke: 0.9pt + blue) } else {
+      let u = (1 - v0) / g
+      line((0, v0), (u, 1), stroke: 0.9pt + blue)
+      line((u, 0), (1, v1 - 1), stroke: 0.9pt + blue)
+    }
+  }
+  // выброшенная траектория p (пунктир): v = (0.45 + g t) mod 1, t in [0, 2]
+  for k in range(2) {
+    let v0 = calc.fract(0.45 + g * k)
+    let v1 = v0 + g
+    let st = (paint: red, dash: "dashed", thickness: 0.8pt)
+    if v1 <= 1 { line((0, v0), (1, v1), stroke: st) } else {
+      let u = (1 - v0) / g
+      line((0, v0), (u, 1), stroke: st)
+      line((u, 0), (1, v1 - 1), stroke: st)
+    }
+  }
+  circle((0, 0.1), radius: 0.018, fill: blue, stroke: blue)
+  content((0, 0.1), text(fill: blue, size: 0.8em)[$x$], anchor: "east", padding: 2pt)
+  content((0, 0.45), text(fill: red, size: 0.8em)[$tr p$], anchor: "east", padding: 2pt)
+  content((0.5, 0), text(size: 0.8em)[$u$], anchor: "north", padding: 3pt)
+  content((1, 0.5), text(size: 0.8em)[$v$], anchor: "west", padding: 3pt)
+})
