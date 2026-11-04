@@ -197,15 +197,71 @@
   circle((0, 0), radius: 1.5, stroke: (dash: "dashed", paint: orange, thickness: 1pt))
 })
 
-#let fig-hartman() = cetz.canvas(length: 2.4cm, {
+// Пример Хартмана (методичка, рис. 1): жирные кривые --- дуги S_0 (u = 4i + cos πt, u = 4i + 2 - cos πt),
+// светлые --- дуги, добавленные в S_1 при m_0 = 3:
+// u_i = u + (v - u) i/m на [a, b] и v_i = u_i sin^2 π(t - c) + u_(i+1) cos^2 π(t - c) на [c, b]
+// (если u(a) = v(a); если u(b) = v(b) --- зеркально, на [a, c]).
+#let fig-hartman() = cetz.canvas(length: 1cm, {
   import cetz.draw: *
-  axes(-0.15, 2.3, -1.3, 3.4)
-  line(..sample(x => calc.cos(calc.pi * x), 0, 2, n: 100), stroke: 1pt + blue)
-  line(..sample(x => 2 - calc.cos(calc.pi * x), 0, 2, n: 100), stroke: 1pt + orange)
-  for t in (0.5, 1, 2) { line((t, -0.04), (t, 0.04), stroke: 0.5pt) }
-  content((0.5, 0), [$1\/2$], anchor: "north", padding: 3pt)
-  content((1, 0), [$1$], anchor: "north", padding: 3pt)
-  content((2, 0), [$2$], anchor: "north", padding: 3pt)
+  let sx = 2.0            // масштаб по t
+  let (t0, t1, u0, u1) = (-1.25, 2.6, -3.3, 3.6)
+  let P(t, u) = (sx * t, u)
+  // рисуем только куски кривой внутри полосы u0 <= u <= u1
+  let pl(pts, st) = {
+    let seg = ()
+    for p in pts + ((0, u1 + 99),) {
+      if p.at(1) >= u0 and p.at(1) <= u1 { seg.push(p) } else {
+        if seg.len() >= 2 { line(..seg, stroke: st) }
+        seg = ()
+      }
+    }
+  }
+  let curve(f, a, b, n: 60) = range(n + 1).map(i => { let t = a + (b - a) * i / n; P(t, f(t)) })
+  let pi = calc.pi
+  // оси
+  line(P(t0, 0), P(t1, 0), mark: (end: ">", fill: ink), stroke: 0.6pt + ink)
+  line(P(0, u0), P(0, u1 + 0.2), mark: (end: ">", fill: ink), stroke: 0.6pt + ink)
+  content(P(t1, 0), $t$, anchor: "north-west", padding: 2pt)
+  content(P(0, u1 + 0.2), $u$, anchor: "south-east", padding: 2pt)
+  for t in (-1, 1, 2) { content(P(t, 0), text(size: 0.75em)[$#t$], anchor: "north-west", padding: 2pt) }
+  content(P(0.5, 0), text(size: 0.75em)[$1/2$], anchor: "north-west", padding: 2pt)
+  for u in (-2, 2) { content(P(0, u), text(size: 0.75em)[$#u$], anchor: "east", padding: 2pt) }
+  // S_0
+  let fs = ()
+  for i in (-2, -1, 0, 1) {
+    fs.push(t => 4 * i + calc.cos(pi * t))
+    fs.push(t => 4 * i + 2 - calc.cos(pi * t))
+  }
+  let m = 3
+  let light = 0.7pt + luma(150)
+  for k in (-2, -1, 0, 1, 2) {
+    let (a, b) = (k, k + 1)
+    let c = a + 0.5
+    let mid = a + 0.5
+    let srt = fs.sorted(key: f => f(mid))
+    for q in range(srt.len() - 1) {
+      let (u, v) = (srt.at(q), srt.at(q + 1))
+      let ui(i) = t => u(t) + (v(t) - u(t)) * i / m
+      let A = calc.abs(u(a) - v(a)) < 1e-6
+      let (ta, tb) = (calc.max(a, t0), calc.min(b, t1))
+      for i in range(1, m) { pl(curve(ui(i), ta, tb), light) }
+      for i in range(m) {
+        let vi = if A {
+          t => ui(i)(t) * calc.pow(calc.sin(pi * (t - c)), 2) + ui(i + 1)(t) * calc.pow(calc.cos(pi * (t - c)), 2)
+        } else {
+          t => ui(i)(t) * calc.pow(calc.sin(pi * (c - t)), 2) + ui(i + 1)(t) * calc.pow(calc.cos(pi * (c - t)), 2)
+        }
+        let (va, vb) = if A { (calc.max(c, t0), tb) } else { (ta, calc.min(c, t1)) }
+        if va < vb { pl(curve(vi, va, vb, n: 40), light) }
+      }
+    }
+  }
+  for f in fs { pl(curve(f, t0, t1, n: 200), 1.4pt + ink) }
+  // подписи на [0, 1]: u = u_0 = cos πt, v = u_3 = 2 - cos πt
+  content(P(1, 3), text(size: 0.75em, fill: blue)[$v$], anchor: "south", padding: 3pt)
+  content(P(1, -1), text(size: 0.75em, fill: blue)[$u$], anchor: "north", padding: 3pt)
+  content(P(0, 1), text(size: 0.75em, fill: blue)[$a$], anchor: "south-east", padding: 3pt)
+  line(P(0.5, u0), P(0.5, u1), stroke: (paint: luma(170), thickness: 0.4pt, dash: "dotted"))
 })
 
 // H(x) = lim F^n(x) / 2^n для F(x) = 2x + sin(2 pi x) / (4 pi) (пример Шуба)
