@@ -493,3 +493,120 @@
   let ka(k) = { let s = ((0.0, 1.0),); for i in range(k) { s = split(s, al / calc.pow(2, 2 * i + 1)) }; s }
   grid(columns: (1fr, 1fr), gutter: 1.5em, align: center, ranks(cl, 4), ranks(ka, 4))
 }
+
+// ---------- Лекция 5 ----------
+
+// Дуга окружности радиуса r с центром c от угла a до угла b (в градусах) --- ломаной
+#let arcpts(c, r, a, b, n: 40) = range(n + 1).map(i => {
+  let t = (a + (b - a) * i / n) * calc.pi / 180
+  (c.at(0) + r * calc.cos(t), c.at(1) + r * calc.sin(t))
+})
+
+// Теорема о выпрямлении: h переводит вертикальные отрезки клетки Q (решения (2))
+// в куски траекторий (1) в окрестности U_a; отрезок y_n = 0 --- в сечение X_n = a_n.
+#let fig-flowbox() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  // клетка Q
+  rect((0, 0), (3, 3), stroke: 0.8pt + ink, fill: luma(248))
+  for s in (0.4, 0.95, 1.5, 2.05, 2.6) {
+    line((s, 0), (s, 3), stroke: 0.9pt + blue)
+    line((s, 2.1), (s, 2.35), mark: (end: ">", fill: blue), stroke: 0.9pt + blue)
+  }
+  line((0, 1.5), (3, 1.5), stroke: (paint: red, dash: "dashed", thickness: 0.8pt))
+  circle((1.5, 1.5), radius: 0.07, fill: ink, stroke: ink)
+  content((1.5, 1.5), [$b$], anchor: "north-west", padding: 3pt)
+  content((3, 1.5), text(fill: red, size: 0.85em)[$y_n = 0$], anchor: "west", padding: 3pt)
+  content((3, 3), [$Q$], anchor: "south-west", padding: 2pt)
+  content((1.5, -0.1), text(size: 0.85em)[$y_* = (y_1, dots, y_(n-1))$], anchor: "north")
+  line((-0.4, 0), (-0.4, 3), mark: (end: ">", fill: ink), stroke: 0.6pt + ink)
+  content((-0.4, 3), [$y_n$], anchor: "south", padding: 2pt)
+  // отображение h
+  line((4.3, 1.5), (5.6, 1.5), mark: (end: ">", fill: ink), stroke: 0.8pt + ink)
+  content((4.95, 1.5), [$h$], anchor: "south", padding: 3pt)
+  // окрестность U_a: образы вертикалей --- траектории X(t, y_*, a_n)
+  let g(s, t) = (7.4 + s + 0.45 * calc.sin(1.6 * t + 0.5 * s) + 0.12 * t * s, 1.5 + t)
+  let col(s) = range(31).map(i => g(s, -1.5 + 3 * i / 30))
+  merge-path(close: true, stroke: 0.8pt + ink, fill: luma(248), {
+    line(..col(-1.1), ..col(1.1).rev())
+  })
+  for s in (-1.1, -0.55, 0, 0.55, 1.1) {
+    let c = col(s)
+    line(..c, stroke: 0.9pt + blue)
+    line(c.at(20), c.at(22), mark: (end: ">", fill: blue), stroke: 0.9pt + blue)
+  }
+  line(g(-1.1, 0), g(1.1, 0), stroke: (paint: red, dash: "dashed", thickness: 0.8pt))
+  circle(g(0, 0), radius: 0.07, fill: ink, stroke: ink)
+  content(g(0, 0), [$a$], anchor: "north-west", padding: 3pt)
+  content(g(1.1, 0), text(fill: red, size: 0.85em)[$X_n = a_n$], anchor: "west", padding: 10pt)
+  content(g(-1.1, 1.5), [$U_a = h(Q)$], anchor: "south-east", padding: 2pt)
+})
+
+// Дерево прообразов точки 1/2 для тента (Улам): прообразы x --- это x/2 и 1 - x/2;
+// прообразы порядков 0..k делят [0, 1] на 2^(k+1) равных отрезков Delta_(k,i).
+#let fig-ulam-tree() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  let W = 9.0
+  let lv = ((1 / 2,), (1 / 4, 3 / 4), (1 / 8, 3 / 8, 5 / 8, 7 / 8))
+  let y(k) = 3.0 - 1.0 * k
+  // рёбра: x -> x/2 и 1 - x/2
+  for k in (0, 1) {
+    for x in lv.at(k) {
+      for c in (x / 2, 1 - x / 2) {
+        line((W * x, y(k)), (W * c, y(k + 1)), stroke: 0.6pt + luma(120))
+      }
+    }
+  }
+  let lab = (([$1\/2$],), ([$1\/4$], [$3\/4$]), ([$1\/8$], [$3\/8$], [$5\/8$], [$7\/8$]))
+  for k in (0, 1, 2) {
+    for (j, x) in lv.at(k).enumerate() {
+      circle((W * x, y(k)), radius: 0.07, fill: red, stroke: red)
+      content((W * x, y(k)), text(size: 0.8em, lab.at(k).at(j)), anchor: "south", padding: 4pt)
+    }
+    content((-0.3, y(k)), text(size: 0.8em)[$f^(-#k)(1\/2)$], anchor: "east")
+  }
+  // отрезок [0, 1], разбитый на Delta_(2,i)
+  let yb = -0.4
+  line((0, yb), (W, yb), stroke: 0.9pt + ink)
+  for i in range(9) {
+    let x = W * i / 8
+    line((x, yb - 0.1), (x, yb + 0.1), stroke: if i == 0 or i == 8 { 0.9pt + ink } else { 0.9pt + red })
+  }
+  content((0, yb), [$0$], anchor: "north", padding: 4pt)
+  content((W, yb), [$1$], anchor: "north", padding: 4pt)
+  content((W / 16, yb), text(size: 0.8em)[$Delta_(2,0)$], anchor: "north", padding: 4pt)
+  content((W * 15 / 16, yb), text(size: 0.8em)[$Delta_(2,7)$], anchor: "north", padding: 4pt)
+  content((W / 2, y(2) - 0.55), text(size: 0.8em)[$dots.v$])
+})
+
+// f(z) = z^3: открытая дуга U длины ell переходит в дугу длины 3 ell.
+#let fig-power-circle() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  let o = (0, 0)
+  circle(o, radius: 1.5, stroke: 0.6pt + ink)
+  line(..arcpts(o, 1.5, 15, 40), stroke: 2.2pt + blue)
+  line(..arcpts(o, 1.75, 45, 120), stroke: 2.2pt + red, mark: (end: ">", fill: red))
+  content((1.5 * calc.cos(27deg), 1.5 * calc.sin(27deg)), text(fill: blue)[$U$], anchor: "north-east", padding: 4pt)
+  content((1.75 * calc.cos(85deg), 1.75 * calc.sin(85deg)), text(fill: red)[$f(U)$], anchor: "south", padding: 3pt)
+  circle((1.5, 0), radius: 0.05, fill: ink, stroke: ink)
+  content((1.5, 0), text(size: 0.8em)[$1$], anchor: "west", padding: 3pt)
+})
+
+// Иррациональный поворот (от противного): если cl(tr z) != S^1, то смежный интервал I
+// и его образы f^n (I) --- дуги одной длины с попарно непересекающимися замыканиями.
+#let fig-rotation-gap() = cetz.canvas(length: 1cm, {
+  import cetz.draw: *
+  let o = (0, 0)
+  circle(o, radius: 1.6, stroke: 0.6pt + ink)
+  let al = 0.3 * 360
+  let I0 = 20
+  let L = 22
+  for n in (0, 1, 2, 3) {
+    let a = I0 + n * al
+    line(..arcpts(o, 1.6, a, a + L), stroke: 2.4pt + red)
+    let m = (a + L / 2) * calc.pi / 180
+    let lab = if n == 0 { [$I$] } else if n == 1 { [$f(I)$] } else { [$f^#n (I)$] }
+    content((2.2 * calc.cos(m), 2.2 * calc.sin(m)), text(fill: red, size: 0.85em, lab))
+  }
+  line(..arcpts(o, 0.9, I0 + L / 2, I0 + L / 2 + al), stroke: 0.7pt + ink, mark: (end: ">", fill: ink))
+  content((0.35, 0.55), text(size: 0.8em)[$2 pi alpha$])
+})
